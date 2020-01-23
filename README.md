@@ -103,7 +103,7 @@ To provide feedback from the command line, try the `az feedback` command.
 ### Docker
 
 We maintain a Docker image preconfigured with the Azure CLI.
-See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
+See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for available versions.
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
@@ -132,6 +132,28 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
+Here's an example of installing edge builds with pip3 in a virtual environment. The `--upgrade-strategy=eager` option will install the edge builds of dependencies as well. 
+
+```bash
+$ python3 -m venv env
+$ . env/bin/activate
+$ pip3 install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --upgrade-strategy=eager
+```
+
+To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
+the feed is frequently updated.
+
+```bash
+$ pip3 install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir --upgrade-strategy=eager
+```
+
+The edge build is generated for each PR merged to the `dev` branch as a part of the Azure DevOps Pipelines. 
+
+## Get builds of arbitrary commit or PR
+
+If you would like to get builds of arbitrary commit or PR, see:
+
+[Try new features before release](doc/try_new_features_before_release.md)
 
 ## Developer Setup
 

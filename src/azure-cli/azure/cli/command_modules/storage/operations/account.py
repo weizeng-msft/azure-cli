@@ -13,19 +13,21 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
-                           azure_storage_sid=None):
+                           azure_storage_sid=None, enable_hierarchical_namespace=None,
+                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
-    logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
-                   "in the future")
+    if kind is None:
+        logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
+                       "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
@@ -37,6 +39,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only is not None:
         params.enable_https_traffic_only = https_only
+    if enable_hierarchical_namespace is not None:
+        params.is_hns_enabled = enable_hierarchical_namespace
+
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -81,6 +86,18 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                                  virtual_network_rules=None)
+
+    if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
+        EncryptionServices = cmd.get_models('EncryptionServices')
+        EncryptionService = cmd.get_models('EncryptionService')
+        params.encryption = Encryption()
+        params.encryption.services = EncryptionServices()
+        if encryption_key_type_for_table is not None:
+            table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
+            params.encryption.services.table = table_encryption_service
+        if encryption_key_type_for_queue is not None:
+            queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
+            params.encryption.services.queue = queue_encryption_service
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -331,3 +348,18 @@ def update_management_policies(client, resource_group_name, account_name, parame
     if parameters:
         parameters = parameters.policy
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
+
+
+# TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
+def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
+                                   delete_retention_days=None):
+    if enable_change_feed is not None:
+        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+
+    if enable_delete_retention is not None:
+        if enable_delete_retention is False:
+            delete_retention_days = None
+        instance.delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
+            enabled=enable_delete_retention, days=delete_retention_days)
+
+    return instance

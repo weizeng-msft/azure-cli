@@ -3,31 +3,343 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] `az acr delete` will prompt
+
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+* Support import/export of all labels from appconfig to appconfig
+* Validate key and feature names before setting and importing
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
+
+**AppService**
+
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
+**ARM**
+
+* Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+
+**IoT**
+
+* Deprecated 'IoT hub Job' commands.
+
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
+**Misc**
+
+* Fix #6371: Support filename and environment variable completion in Bash
+
+**Network**
+
+* Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Storage**
+
+* Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
+* Fix issue #11415: permission error for `az storage blob update`
+* Integrate Azcopy 10.3.3 and support Win32.
+* `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+
+2.0.80
+++++++
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
+**Storage**
+
+* Upgrade azure-mgmt-storage version to 7.1.0
+* `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
+
+2.0.79
+++++++
+
+**ACR**
+
+* [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
+
+**AppConfig**
+
+* Add support for importing/exporting feature flags
+* Add new command 'az appconfig kv set-keyvault' for creating keyvault reference
+* Support various naming conventions when exporting feature flags to file
+
+**AppService**
+
+* Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
+* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
+* Fix issue #11592: Add az webapp up flag for html static sites
+
+**ARM**
+
+* Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
+**Backup**
+
+* Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
+* Added disk exclusion support for IaasVM workload
+
+**Compute**
+
+* Fix `vm create` failure in Azure Stack profile.
+* vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
+* Add new reapply command action for az vm
+
+**Misc.**
+
+* Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
+
+**Event Hubs**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az eventhubs eventhub update' and 'az eventhubs eventhub create'. This option is not valid for Event Hub entities.
+
+**Service Bus**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
+
+**RBAC**
+
+* Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
+
+**Redis**
+
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
+
+**Storage**
+
+* `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+* Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
+* Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
+
+2.0.78
+++++++
+
+**ACR**
+
+* Support Local context in acr task run
+
+**ACS**
+
+* [BREAKING CHANGE]az openshift create: rename `--workspace-resource-id` to `--workspace-id`.
+
+**AMS**
+
+* Update show commands to return 3 when resource not found
+
+**AppConfig**
+
+* Fix bug when appending api-version to request url. The existing solution doesn't work with pagination.
+* Support showing languages besides English as our backend service support unicode for globalization.
+
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+* Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
+* Add support for importing certificates from Key Vault `az webapp config ssl import`
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 6.0.0
+* Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
+* Add new parameter `--metadata` to support adding metadata information for policy set definitions.
+
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
+
+**BotService**
+
+* [BREAKING CHANGE] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* Add name availability check for 'az bot create'.
+* Add support for updating the icon URL for a bot via 'az bot update'.
+* Add support for updating a Direct Line channel via 'az bot directline update'.
+* Add '--enable-enhanced-auth' flag support to 'az bot directline create'.
+* The following command groups are GA and not in preview: 'az bot authsetting'.
+* The following commands in 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'.
+* Fix 'az bot prepare-deploy' changing '--proj-file-path' value to lower case (e.g. "Test.csproj" to "test.csproj").
+
+**Compute**
+
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
+* vm/vmss update: Add --priority.
+* vm/vmss update: Add --max-price.
+* Add disk-encryption-set command group (create, show, update, delete, list).
+* disk create: Add --encryption-type and --disk-encryption-set.
+* vm/vmss create: Add --os-disk-encryption-set and --data-disk-encryption-sets.
+
+**Core**
+
+* Remove support for Python 3.4
+* Plug in HaTS survey in multiple commands
+
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb package to use 0.11.0
+* az cosmosdb network-rule allows --vnet-name and --ignore-missing-endpoint as parameters
+
+**DLS**
+
+* Update ADLS sdk version (0.0.48).
+
+**HDInsight**
+
+* Support for creating a Kafka cluster with Kafka Rest Proxy
+* Upgrade azure-mgmt-hdinsight to 1.3.0
+
+**Install**
+
+* Install script support python 3.8
+
+**IOT**
+
+* [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
+
+**Key Vault**
+
+* Fix #8095: `az keyvault storage remove`: improve the help message
+* Fix #8921: `az keyvault key/secret/certificate list/list-deleted/list-versions`: fix the validation bug on parameter `--maxresults`
+* Fix #10512: `az keyvault set-policy`: improve the error message when none of `--object-id`, `--spn` or `--upn` is specified
+* Fix #10846: `az keyvault secret show-deleted`: when `--id` is specified, `--name/-n` is not required
+* Fix #11084: `az keyvault secret download`: improve the help message of parameter `--encoding`
+
+**Network**
+
+* az network application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network application-gateway url-path-map create/update: bug fix for `--waf-policy`
+* az network application-gateway: support `--rewrite-rule-set`
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+* az network dns zone import: Support .@ in record name
+
+**Packaging**
+
+* Add back edge builds for pip install
+* Add Ubuntu eoan package
+
+**Policy**
+
+* Support for Policy API version 2019-09-01.
+* az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+
+**Redis**
+
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
+
+**ServiceFabric**
+
+* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
+* Update ServiceFabricNodeVmExt version to 1.1 in creation template
+
+**SQL**
+
+* Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
+**Storage**
+
+* GA Release Large File Shares property for storage account create and update command
+* GA Release User Delegation SAS token Support
+* Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
+* [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
+* Fix issue #11043: Support to remove whole container/share in `az storage remove` command
+
+2.0.77
+++++++
+
+**ACR**
+
+* Deprecated parameter `--branch` from acr task create/update
+
+**Azure Red Hat OpenShift**
+
+* Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
+* Add `monitor_profile` to create Azure Red Hat OpenShift cluster with monitoring
+
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
+**AppConfig**
+
+* Add support for using ":" for `as az appconfig kv import` separator
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
+
 **AppService**
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
+* Add support for App Service Environment: az appservice ase show | list | list-addresses | list-plans | create | update | delete
+
+**Backup**
+
+* Fix issue in az backup policy list-associated-items. Added optional BackupManagementType parameter.
 
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
+* vmss create: Improvement for --orchestration-mode
+* sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
+* sig image-version create: Support --os-snapshot and --data-snapshots
+* image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* Upgrade Python Compute SDK to 10.0.0
+* vm/vmss create: Add 'Spot' to 'Priority' enum property
+* [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
+* vm monitor log show: support query log over linked log analytics workspace.
+
+**IOT**
+
+* Fix #2531: Add convenience arguments for hub update.
+* Fix #8323: Add missing parameters to create storage custom endpoint.
+* Fix regression bug: Reverting the changes which overrides the default storage endpoint.
 
 **Key Vault**
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.7.0 which includes some additional volume properties associated with upcoming replication operations
+
+**Network**
+
+* application-gateway waf-config: deprecated
+* application-gateway waf-policy: Add subgroup managed-rules to manage managed rule sets and exclusion rules
+* application-gateway waf-policy: Add subgroup policy-setting to manage global configuration of a waf-policy
+* [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
+* application-gateway http-listener: Add --firewall-policy when create
+* application-gateway url-path-map rule: Add --firewall-policy when create
+
 **Packaging**
 
-* Rewrite the az wrapper in python
+* Rewrite the az wrapper in Python
+* Support Python 3.8
+* Use Python 3 for RPM package
 
 **Profile**
 
 * Polish error when running `az login -u {} -p {}` with Microsoft account
 * Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
 * Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
+* Fix #11059: `az login --allow-no-subscriptions` fails if there are subscriptions in the tenant
+* Fix #11238: After renaming a subscription, logging in with MSI will result in the same subscription appearing twice
 
 **RBAC**
 
@@ -37,6 +349,26 @@ Release History
 
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+* Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
+* Add new command `az reservations reservation-order purchase` to purchase a new reservation
+
+**Rest**
+* `az rest` is now GA
+
+**SQL**
+
+* Update azure-mgmt-sql to version 0.15.0.
+
+**Storage**
+
+* storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
+* Remove unrelated exception from error message
+* Fix issues with incorrect error message "You do not have the required permissions needed to perform this operation." when blocked by network rules or AuthenticationFailed.
+
 2.0.76
 ++++++
 
@@ -45,11 +377,6 @@ Release History
 * Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
-
-**Reservations**
-
-* Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling Get-Gatalogs
 
 **AKS**
 
@@ -63,11 +390,13 @@ Release History
 
 **AppService**
 
-* az appservice plan create: Adding support to set 'persitescaling' on appservice plan create.
+* az appservice plan create: Adding support to set 'persitescaling' and app service environment on appservice plan create.
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 
@@ -106,7 +435,6 @@ Release History
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
 * Bug Fixed: Return more descriptive message on raised exception.
-* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 

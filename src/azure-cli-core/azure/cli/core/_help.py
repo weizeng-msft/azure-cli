@@ -7,6 +7,7 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
+from azure.cli.core.commands.constants import SURVEY_PROMPT
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -77,7 +78,7 @@ class CLIPrintMixin(CLIHelp):
         from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
-        for e in help_file.examples:
+        for e in AzCliHelp.example_provider(help_file):
             indent = 1
             _print_indent(u'{0}'.format(e.short_summary), indent)
             indent = 2
@@ -150,6 +151,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
         super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
+        print(SURVEY_PROMPT)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
@@ -187,6 +189,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             for name in file_names:
                 file_contents[name] = self._name_to_content[name]
             self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
+
+    # This method is meant to be a hook that can be overridden by an extension or module.
+    @staticmethod
+    def example_provider(help_file):
+        return help_file.examples
 
 
 class CliHelpFile(KnackHelpFile):

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
 
 
 class MonitorTests(ScenarioTest):
@@ -31,7 +32,7 @@ class MonitorTests(ScenarioTest):
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
         self.cmd('monitor action-group create -g {rg} -n {ag2}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -41,15 +42,14 @@ class MonitorTests(ScenarioTest):
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
-        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-condition cond0 --add-condition "total transactions < 100" --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
             self.check('description', 'alt desc'),
             self.check('severity', 3),
             self.check('autoMitigate', True),
             self.check('windowSize', '0:15:00'),
             self.check('evaluationFrequency', '0:05:00'),
-            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf)', 1),
             self.check('length(criteria.allOf[0].dimensions)', 1),
-            self.check('length(criteria.allOf[1].dimensions)', 0),
             self.check("contains(actions[0].actionGroupId, 'actionGroups/ag2')", True),
             self.check('length(actions)', 1)
         ])
@@ -63,7 +63,7 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob: or PutBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob:"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
             self.check('length(criteria.allOf)', 1),
@@ -175,6 +175,43 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor alert update -g {} -n {} --email-service-owners False --remove-action webhook {} '
                  '--add-action webhook {}'.format(resource_group, rule1, webhook1, webhook2))
         _check_webhooks(result['actions'], [webhook2])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
+    @VMPreparer(parameter_name='vm1')
+    @VMPreparer(parameter_name='vm2')
+    def test_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
+
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines'),
+            'vm_id_2': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm2,
+                namespace='Microsoft.Compute',
+                type='virtualMachines')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
+            self.check('description', 'High CPU'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(scopes)', 2),
+        ])
 
 
 if __name__ == '__main__':

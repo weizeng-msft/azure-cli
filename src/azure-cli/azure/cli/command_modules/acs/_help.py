@@ -327,7 +327,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSet).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -896,6 +896,9 @@ parameters:
   - name: --customer-admin-group-id
     type: string
     short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
+  - name: --workspace-id
+    type: string
+    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
 
 
 examples:
@@ -907,6 +910,8 @@ examples:
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
   - name: Create an Openshift cluster using a custom vnet
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
+  - name: Create an Openshift cluster with Log Analytics monitoring enabled
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
 helps['openshift delete'] = """

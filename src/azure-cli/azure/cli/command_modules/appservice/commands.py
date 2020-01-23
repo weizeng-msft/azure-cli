@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_exists_in_rg
+from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_sku
 
 
 def output_slots_in_table(slots):
@@ -59,7 +59,7 @@ def ex_handler_factory(creating_plan=False):
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
     webclient_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.web_site_management_client#WebSiteManagementClient.{}',
+        operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client
     )
     appservice_plan_sdk = CliCommandType(
@@ -70,9 +70,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.web.operations#WebAppsOperations.{}',
         client_factory=cf_webapps
     )
+
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
 
     webapp_access_restrictions = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.access_restrictions#{}')
+
+    appservice_environment = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_environment#{}')
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
@@ -118,10 +121,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_connection_strings')
 
     with self.command_group('webapp config storage-account') as g:
-        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404)
-        g.custom_command('add', 'add_azure_storage_account')
-        g.custom_command('update', 'update_azure_storage_account')
-        g.custom_command('delete', 'delete_azure_storage_accounts')
+        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404, is_preview=True)
+        g.custom_command('add', 'add_azure_storage_account', is_preview=True)
+        g.custom_command('update', 'update_azure_storage_account', is_preview=True)
+        g.custom_command('delete', 'delete_azure_storage_accounts', is_preview=True)
 
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -140,6 +143,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory(), validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
@@ -191,7 +195,7 @@ def load_command_table(self, _):
         g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
-        g.show_command('show', 'get_publishing_user')
+        g.custom_show_command('show', 'get_publishing_user')
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment container') as g:
@@ -230,12 +234,13 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
-        g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
+        g.custom_command('create', 'create_app_service_plan', supports_no_wait=True,
+                         exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan',
-                                 validator=validate_asp_exists_in_rg)
+                                 validator=validate_asp_sku, supports_no_wait=True)
 
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
@@ -279,6 +284,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('unbind', 'unbind_ssl_cert')
         g.custom_command('delete', 'delete_ssl_cert')
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('functionapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
@@ -340,3 +346,12 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
+
+    with self.command_group('appservice ase', custom_command_type=appservice_environment, is_preview=True) as g:
+        g.custom_command('list', 'list_appserviceenvironments')
+        g.custom_command('list-addresses', 'list_appserviceenvironment_addresses')
+        g.custom_command('list-plans', 'list_appserviceenvironment_plans')
+        g.custom_command('show', 'show_appserviceenvironment')
+        g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
+        g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
+        g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
